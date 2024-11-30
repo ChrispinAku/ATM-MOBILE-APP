@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Bank ATM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .atm-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .pin-section, .menu-section {
+            text-align: center;
+        }
+
+        h1 {
+            color: #1a73e8;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #1557b0;
+        }
+
+        .menu-options {
+            display: grid;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .balance-display {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+            color: #1a73e8;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .success-message {
+            color: #388e3c;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="atm-container">
+        <div class="pin-section">
+            <h1>QUICK BANK ATM</h1>
+            <input type="password" id="pin-input" placeholder="Enter PIN" maxlength="4">
+            <div class="error-message hidden" id="pin-error">Incorrect PIN. Please try again.</div>
+            <button onclick="checkPin()">Submit</button>
+        </div>
+
+        <div class="menu-section hidden">
+            <h1>Welcome to Quick Bank</h1>
+            <div class="balance-display" id="balance">Balance: 1000 RWF</div>
+            <div class="menu-options">
+                <button onclick="checkBalance()">Check Balance</button>
+                <button onclick="showWithdrawInput()">Withdraw Money</button>
+                <button onclick="showDepositInput()">Deposit Money</button>
+                <button onclick="exit()">Exit</button>
+            </div>
+            <div class="transaction-section hidden">
+                <input type="number" id="amount-input" placeholder="Enter amount">
+                <button id="confirm-transaction">Confirm</button>
+                <div class="error-message hidden" id="transaction-error"></div>
+                <div class="success-message hidden" id="transaction-success"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let balance = 1000;
+        const correctPin = "1234";
+
+        function checkPin() {
+            const pinInput = document.getElementById('pin-input').value;
+            const pinError = document.getElementById('pin-error');
+            const pinSection = document.querySelector('.pin-section');
+            const menuSection = document.querySelector('.menu-section');
+
+            if(pinInput === correctPin) {
+                pinSection.classList.add('hidden');
+                menuSection.classList.remove('hidden');
+            } else {
+                pinError.classList.remove('hidden');
+            }
+        }
+
+        function checkBalance() {
+            document.getElementById('balance').textContent = `Balance: ${balance.toFixed(2)} RWF`;
+        }
+
+        function showWithdrawInput() {
+            setupTransaction('withdraw');
+        }
+
+        function showDepositInput() {
+            setupTransaction('deposit');
+        }
+
+        function setupTransaction(type) {
+            const transactionSection = document.querySelector('.transaction-section');
+            const amountInput = document.getElementById('amount-input');
+            const confirmButton = document.getElementById('confirm-transaction');
+            
+            transactionSection.classList.remove('hidden');
+            amountInput.value = '';
+            
+            confirmButton.onclick = () => {
+                const amount = parseFloat(amountInput.value);
+                if(type === 'withdraw') {
+                    handleWithdraw(amount);
+                } else {
+                    handleDeposit(amount);
+                }
+            };
+        }
+
+        function handleWithdraw(amount) {
+            const errorMsg = document.getElementById('transaction-error');
+            const successMsg = document.getElementById('transaction-success');
+            
+            if(amount > balance) {
+                errorMsg.textContent = "Insufficient funds.";
+                errorMsg.classList.remove('hidden');
+                successMsg.classList.add('hidden');
+            } else {
+                balance -= amount;
+                successMsg.textContent = `Withdrawal successful. New balance: ${balance.toFixed(2)} RWF`;
+                successMsg.classList.remove('hidden');
+                errorMsg.classList.add('hidden');
+                checkBalance();
+            }
+        }
+
+        function handleDeposit(amount) {
+            const successMsg = document.getElementById('transaction-success');
+            balance += amount;
+            successMsg.textContent = `Deposit successful. New balance: ${balance.toFixed(2)} RWF`;
+            successMsg.classList.remove('hidden');
+            document.getElementById('transaction-error').classList.add('hidden');
+            checkBalance();
+        }
+
+        function exit() {
+            const pinSection = document.querySelector('.pin-section');
+            const menuSection = document.querySelector('.menu-section');
+            
+            menuSection.classList.add('hidden');
+            pinSection.classList.remove('hidden');
+            document.getElementById('pin-input').value = '';
+            document.getElementById('pin-error').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
